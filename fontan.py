@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+
+
 import wave
 import numpy as np
 import math
@@ -7,7 +9,7 @@ import math
 types = {
     1: np.int8,
     2: np.int16,
-    3: np.dtype([('first_byte_pair', '<i2'), ('second_pair', '<u1')]),
+    3: np.dtype([('f', 'i2'), ('l', 'u1')]),
     4: np.int32
 }
 
@@ -28,6 +30,7 @@ wav = wave.open("music.wav", mode="r")
 duration = nframes / framerate
 w, h = 800, 300
 k = nframes/w/32
+DPI = 72
 peak = 256 ** sampwidth / 2
 
 content = wav.readframes(nframes)
@@ -40,6 +43,18 @@ for n in range(nchannels):
     channel = channel[0::k]
     if nchannels == 1:
         channel = channel - peak
+
+    if sampwidth == 3:
+    	#Cast type
+    	for i in range(len(channel) ):
+    		elem = channel[i]
+    		res = np.int32( elem["f"] )
+    		res = res << 8
+    		res += elem["l"]
+    		print(elem)
+    		print(res)
+
+    '''
     for i in range(len(channel)):
     	print(channel[i])    
-   
+   '''
