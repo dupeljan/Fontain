@@ -10,7 +10,7 @@ FILE_PATCH = "24.wav"
 types = {
     1: np.int8,
     2: np.int16,
-    3: np.dtype([('f', 'i2'), ('l', 'i1')]),
+    3: np.int16#np.dtype([('f', 'i2'), ('l', 'i1')]),
     4: np.int32
 }
 def format_time(x, pos=None):
@@ -73,7 +73,7 @@ for n in range(nchannels):
     channel = channel[0::k]
 
     axes = plt.subplot(2, 1, n+1)
-    
+    '''
     if sampwidth == 3:
         #Cast type
         file = open("output1",'w')
@@ -94,7 +94,7 @@ for n in range(nchannels):
         
     
         channel = np.asarray(new_channel)
-    
+    '''
     if nchannels == 1:
         channel = channel - peak
         
