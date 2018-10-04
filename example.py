@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-
-
 import wave
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,7 +9,7 @@ FILE_PATCH = "music1.wav"
 types = {
     1: np.int8,
     2: np.int16,
-    3: np.int32,#np.dtype([('f', 'i2'), ('l', 'i1')]),
+    3: np.int32,
     4: np.int32
 }
 def format_time(x, pos=None):
@@ -34,80 +32,54 @@ def format_db(x, pos=None):
     db = 20 * math.log10(abs(x) / float(peak))
     return int(db)
 
+#Парсим входной wav файл
 wav = wave.open(FILE_PATCH, mode="r")
 (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
+# nchannels - кол-во каналов
+# sampwidth - глубина дискретизации в байтах
+# framerate - 
+# nframes   - кол-во фреймов
+# comptype  - тип компонент
+# compname  - имя типа компонент
 
+#Если глубина дискретизации 24 бита
 if sampwidth == 3:
     wav.close()
+    #Конвертируем в 32 бита
     data, samplerate = soundfile.read(FILE_PATCH)
     soundfile.write('new.wav', data, samplerate, subtype='PCM_32')
-    #wav = wave.open("music.wav", mode="w")
-    ###
-    #wav.setnchannels(nchannels)
-    #wav.setsampwidth(2)
-    #wav.setframerate(framerate)
-    #wav.writeframes(nframes)
-    ###
-    #wav.close()
+    #Открываем и читаем wav заново
     wav = wave.open("new.wav", mode="r")
     (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
-    print(nframes)
-
-    print("yooo")
-
-
+    
+# Длительность
 duration = nframes / framerate
 w, h = 800, 300
-k = 50#nframes/w/32
+# Коэф
+k = 50
 DPI = 72
+# Пиковая амплетуда
 peak = 256 ** sampwidth / 2 #sampwidth * 8 * 20 * math.log10(2)    #= 256 ** sampwidth / 2
-print (sampwidth)
-print(peak)
+# Читаем wav  в строку
 content = wav.readframes(nframes)
-
-
+#Приводим к numpy массиву
 samples = np.fromstring(content, dtype=types[sampwidth])
 
 plt.figure(1, figsize=(float(w)/DPI, float(h)/DPI), dpi=DPI)
 plt.subplots_adjust(wspace=0, hspace=0)
 
 for n in range(nchannels):
-
+    # Отсавляем только эл-ты кратные n + nchannels * p, p in N
     channel = samples[n::nchannels]
-
+    # Отсавляем только эл-ты кратные k * p, p in N
     channel = channel[0::k]
 
     axes = plt.subplot(2, 1, n+1)
-    '''
-    if sampwidth == 3:
-        #Cast type
-        file = open("output1",'w')
-        new_channel = list()
-        for i in range(len(channel) ):
-            elem = channel[i]
-            res = np.int32( elem["f"] )
-            res = res << 8
-            res += elem["l"]
-            res /
-            #print(elem)
-
-
-            file.write(str(np.asscalar(res)))
-            file.write('\n')
-            new_channel.append(res) 
-        file.close()
-        
-    
-        channel = np.asarray(new_channel)
-    '''
+    # Один канал => int8 без знака, отнимаем
     if nchannels == 1:
         channel = channel - peak
         
-    file = open("output",'w')
-    for i in range(len(channel)):
-        file.write(str(np.asscalar(channel[i])))
-        file.write('\n')
-    file.close()
+    # Получили массив диапазонов channel    
     
     
 
