@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env pythonpytho
 
 
 
@@ -9,7 +9,7 @@ import math
 types = {
     1: np.int8,
     2: np.int16,
-    3: np.dtype([('f', 'i2'), ('l', 'u1')]),
+    3: np.dtype([('f', 'i2'), ('l', 'i1')]),
     4: np.int32
 }
 

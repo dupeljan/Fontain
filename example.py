@@ -10,6 +10,7 @@ import math
 types = {
     1: np.int8,
     2: np.int16,
+    3: np.dtype([('f', 'i2'), ('l', 'i1')]),
     4: np.int32
 }
 
@@ -56,6 +57,16 @@ for n in range(nchannels):
         channel = channel - peak
 
     axes = plt.subplot(2, 1, n+1, axisbg="k")
+    if sampwidth == 3:
+        #Cast type
+        new_channel = np.array()
+        for i in range(len(channel) ):
+            elem = channel[i]
+            res = np.int32( elem["f"] )
+            res = res << 8
+            res += elem["l"]
+            #print(res)
+    
     axes.plot(channel, "g")
     axes.yaxis.set_major_formatter(ticker.FuncFormatter(format_db))
     plt.grid(True, color="w")
