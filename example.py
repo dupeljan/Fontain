@@ -39,7 +39,8 @@ wav = wave.open("music.wav", mode="r")
 
 duration = nframes / framerate
 w, h = 800, 300
-k = nframes/w/32
+k = 50#nframes/w/32
+print(k)
 DPI = 72
 peak = 256 ** sampwidth / 2
 
@@ -57,6 +58,7 @@ for n in range(nchannels):
         channel = channel - peak
 
     axes = plt.subplot(2, 1, n+1)
+    
     if sampwidth == 3:
         #Cast type
         new_channel = list()
@@ -71,8 +73,13 @@ for n in range(nchannels):
         channel = np.asarray(new_channel)
     
         
+    file = open("output",'w')
     for i in range(len(channel)):
-        print(channel[i])
+        file.write(str(np.asscalar(channel[i])))
+        file.write('\n')
+    file.close()
+    
+    
 
     axes.plot(channel, "g")
     axes.yaxis.set_major_formatter(ticker.FuncFormatter(format_db))
