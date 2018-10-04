@@ -6,11 +6,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import math
-FILE_PATCH = "24.wav"
+import soundfile
+FILE_PATCH = "music1.wav"
 types = {
     1: np.int8,
     2: np.int16,
-    3: np.int16#np.dtype([('f', 'i2'), ('l', 'i1')]),
+    3: np.int32,#np.dtype([('f', 'i2'), ('l', 'i1')]),
     4: np.int32
 }
 def format_time(x, pos=None):
@@ -36,6 +37,25 @@ def format_db(x, pos=None):
 wav = wave.open(FILE_PATCH, mode="r")
 (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
 
+if sampwidth == 3:
+    wav.close()
+    data, samplerate = soundfile.read(FILE_PATCH)
+    soundfile.write('new.wav', data, samplerate, subtype='PCM_32')
+    #wav = wave.open("music.wav", mode="w")
+    ###
+    #wav.setnchannels(nchannels)
+    #wav.setsampwidth(2)
+    #wav.setframerate(framerate)
+    #wav.writeframes(nframes)
+    ###
+    #wav.close()
+    wav = wave.open("new.wav", mode="r")
+    (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
+    print(nframes)
+
+    print("yooo")
+
+
 duration = nframes / framerate
 w, h = 800, 300
 k = 50#nframes/w/32
@@ -44,23 +64,8 @@ peak = 256 ** sampwidth / 2 #sampwidth * 8 * 20 * math.log10(2)    #= 256 ** sam
 print (sampwidth)
 print(peak)
 content = wav.readframes(nframes)
-'''if sampwidth == 3:
-    wav.close()
-    wav = wave.open("music.wav", mode="w")
-    ###
-    wav.setnchannels(nchannels)
-    wav.setsampwidth(2)
-    wav.setframerate(framerate)
-    #wav.writeframes(nframes)
-    ###
-    wav.close()
-    
-    wav = wave.open("music.wav", mode="r")
-    (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
-    print(nframes)
 
-    print("yooo")
-'''
+
 samples = np.fromstring(content, dtype=types[sampwidth])
 
 plt.figure(1, figsize=(float(w)/DPI, float(h)/DPI), dpi=DPI)
