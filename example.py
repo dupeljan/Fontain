@@ -56,17 +56,24 @@ for n in range(nchannels):
     if nchannels == 1:
         channel = channel - peak
 
-    axes = plt.subplot(2, 1, n+1, axisbg="k")
+    axes = plt.subplot(2, 1, n+1)
     if sampwidth == 3:
         #Cast type
-        new_channel = np.array()
+        new_channel = list()
         for i in range(len(channel) ):
             elem = channel[i]
             res = np.int32( elem["f"] )
             res = res << 8
             res += elem["l"]
+            new_channel.append(res) 
             #print(res)
+
+        channel = np.asarray(new_channel)
     
+        
+    for i in range(len(channel)):
+        print(channel[i])
+
     axes.plot(channel, "g")
     axes.yaxis.set_major_formatter(ticker.FuncFormatter(format_db))
     plt.grid(True, color="w")
