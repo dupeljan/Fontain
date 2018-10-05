@@ -5,9 +5,9 @@ import wave
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import math
+from math import *
 import soundfile
-FILE_PATCH = "music1.wav"
+FILE_PATCH = "24.wav"
 types = {
     1: np.int8,
     2: np.int16,
@@ -24,15 +24,24 @@ def format_time(x, pos=None):
         out = "%d:" % hours
     return out
 
-def format_db(x, pos=None):
+def format_db_str(x, pos=None):
     if pos == 0:
         return ""
     global peak
     if x == 0:
         return "-inf"
 
-    db = 20 * math.log10(abs(x) / float(peak))
+    db = 20 * log10(abs(x) / float(peak))
     return int(db)
+
+def format_db_int(x):
+    global peak
+    if x == 0:
+        return 0
+
+    db = 20 * log10(abs(x) / float(peak))
+    return int(db)
+    
 
 wav = wave.open(FILE_PATCH, mode="r")
 (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
@@ -41,28 +50,17 @@ if sampwidth == 3:
     wav.close()
     data, samplerate = soundfile.read(FILE_PATCH)
     soundfile.write('new.wav', data, samplerate, subtype='PCM_32')
-    #wav = wave.open("music.wav", mode="w")
-    ###
-    #wav.setnchannels(nchannels)
-    #wav.setsampwidth(2)
-    #wav.setframerate(framerate)
-    #wav.writeframes(nframes)
-    ###
-    #wav.close()
     wav = wave.open("new.wav", mode="r")
     (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
-    print(nframes)
 
-    print("yooo")
 
 
 duration = nframes / framerate
 w, h = 800, 300
-k = 50#nframes/w/32
+sec_part = 4
+k = framerate / sec_part #very 1/sec_part second
 DPI = 72
 peak = 256 ** sampwidth / 2 #sampwidth * 8 * 20 * math.log10(2)    #= 256 ** sampwidth / 2
-print (sampwidth)
-print(peak)
 content = wav.readframes(nframes)
 
 
@@ -78,41 +76,30 @@ for n in range(nchannels):
     channel = channel[0::k]
 
     axes = plt.subplot(2, 1, n+1)
-    '''
-    if sampwidth == 3:
-        #Cast type
-        file = open("output1",'w')
-        new_channel = list()
-        for i in range(len(channel) ):
-            elem = channel[i]
-            res = np.int32( elem["f"] )
-            res = res << 8
-            res += elem["l"]
-            res /
-            #print(elem)
 
-
-            file.write(str(np.asscalar(res)))
-            file.write('\n')
-            new_channel.append(res) 
-        file.close()
-        
-    
-        channel = np.asarray(new_channel)
-    '''
     if nchannels == 1:
         channel = channel - peak
         
-    file = open("output",'w')
-    for i in range(len(channel)):
-        file.write(str(np.asscalar(channel[i])))
-        file.write('\n')
+    #processing
+
+    delt_dur = duration / float(len(channel)) 
+    print(delt_dur )
+    abs_dur  = 0
+
+    #Find time when amplitude diference is large
+    file = open("trigger points" + str(n),'w')
+    const_diference = 1
+    for i in range(len(channel) - 1):
+    	if abs(abs( format_db_int(channel[i]) ) - abs( format_db_int(channel[i+1]) ))   > const_diference:
+    		file.write(str(abs_dur))
+    		file.write('\n')
+    	abs_dur += delt_dur
+
     file.close()
-    
     
 
     axes.plot(channel, "g")
-    axes.yaxis.set_major_formatter(ticker.FuncFormatter(format_db))
+    axes.yaxis.set_major_formatter(ticker.FuncFormatter(format_db_str))
     plt.grid(True, color="w")
     axes.xaxis.set_major_formatter(ticker.NullFormatter())
 

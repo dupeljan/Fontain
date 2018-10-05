@@ -1,0 +1,2 @@
+for 16 bit 96.33 db  in code 256 ** 2  / 2 = 32768 
+for 24 bit 144.99 db in code 256 ** 3 / 2 = 8388608
