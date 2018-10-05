@@ -75,14 +75,42 @@ def write_trigger_points(db_chanel,delt_dur):
 	file = open("trigger points.txt",'w')
 	abs_dur = 0
 	for i in range(len(db_chanel)  -1):
-		if abs(db_chanel[i] ) > 50:
-			new_time = abs_dur - 0.3
+		if db_chanel[i]  > 30:
+			new_time = abs_dur 
 			#file.write(str(db_chanel[i]))
 			#file.write("%.2f"  % abs_dur)
 			file.write( "%.2f\tm1:sf(%d)|l3:y\n%.2f\tm1:off" % (new_time ,db_chanel[i]  , new_time + 0.75) )
 			file.write('\n')
 		abs_dur += delt_dur
 	file.close()
+
+def get_frequency(channel, d_time):
+    def sign(x):
+        if x >= 0:
+            return False
+        else:
+            return True
+    freq = []
+    begin = 0
+    i = 0
+    half = False
+    cur_time = 0
+    while i <  len(channel)  - 1:
+        while ( i < len(channel) - 1 and sign(channel[i]) == sign(channel[i+1]) ):
+            i += 1
+            cur_time +=  d_time
+        if not half:
+            half = True
+            i +=1
+        else:
+            if cur_time != 0:
+                for j in range(begin,i-1):
+                    freq.append(int ( (i - begin) / cur_time) )
+            begin = i
+            half = False
+            cur_time = 0
+    return freq
+            
 
 wav = wave.open(FILE_PATCH, mode="r")
 (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
@@ -110,11 +138,20 @@ samples = np.fromstring(content, dtype=types[sampwidth])
 plt.figure(1, figsize=(float(w)/DPI, float(h)/DPI), dpi=DPI)
 plt.subplots_adjust(wspace=0, hspace=0)
 
-for n in range(nchannels):
+image_nchanel = 1
+for n in range(image_nchanel):
 
     channel = samples[n::nchannels]
+    print(len(channel))
 
+    delt_dur = duration / float(len(channel))
+    #freq = get_frequency(channel,delt_dur)
     channel = channel[0::k]
+    #freq = freq[0::k]
+    #for i in range(len(freq)):
+    #    print(str(freq[i]))
+    
+
 
     axes = plt.subplot(2, 1, n+1)
 
@@ -125,7 +162,6 @@ for n in range(nchannels):
 
     delt_dur = duration / float(len(channel)) 
     print(delt_dur )
-    abs_dur  = 0
 
     #Find time when amplitude diference is large
     
