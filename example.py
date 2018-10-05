@@ -32,7 +32,7 @@ def format_db(x, pos=None):
     db = 20 * math.log10(abs(x) / float(peak))
     return int(db)
 
-#Парсим входной wav файл
+#Читаем заголовок wav файла
 wav = wave.open(FILE_PATCH, mode="r")
 (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
 # nchannels - кол-во каналов
@@ -56,7 +56,7 @@ if sampwidth == 3:
 duration = nframes / framerate
 w, h = 800, 300
 # Коэф
-k = 50
+k = 350
 DPI = 72
 # Пиковая амплетуда
 peak = 256 ** sampwidth / 2 #sampwidth * 8 * 20 * math.log10(2)    #= 256 ** sampwidth / 2
@@ -68,6 +68,7 @@ samples = np.fromstring(content, dtype=types[sampwidth])
 plt.figure(1, figsize=(float(w)/DPI, float(h)/DPI), dpi=DPI)
 plt.subplots_adjust(wspace=0, hspace=0)
 
+# Парсим wav
 for n in range(nchannels):
     # Отсавляем только эл-ты кратные n + nchannels * p, p in N
     channel = samples[n::nchannels]
