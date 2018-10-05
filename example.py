@@ -39,9 +39,49 @@ def format_db_int(x):
     if x == 0:
         return 0
 
-    db = 20 * log10(abs(x) / float(peak))
+    db = 20 * log10(abs(x) / float(peak)) 
     return int(db)
     
+
+def get_db_channel(channel):
+	#Create db vector, comput max
+	max = 0
+	db_chanel = [] 
+
+	for i in range(len(channel)):
+		cur = abs(format_db_int(channel[i]))
+		db_chanel.append(cur)
+		if max < cur:
+			max = cur
+	# Normalize vector
+	if max != 0:
+		db_chanel = [ int((i / float(max) ) * 100 ) for i in db_chanel ] 
+	
+	return	db_chanel
+
+def norm_diferende(channel):
+	norm_db = []
+	max = 0
+	for i in range(len(channel) - 1):
+		norm_db.append(abs( channel[i] - channel[i+1]))
+		if max < norm_db[i]:
+			max = norm_db[i]
+	#Normalize
+	if max != 0:
+		norm_db = [ int((i / float(max) ) * 100 ) for i in norm_db ]
+	return norm_db
+
+def write_trigger_points(db_chanel,delt_dur):
+	file = open("trigger points",'w')
+	abs_dur = 0
+	for i in range(len(db_chanel) - 1):
+		#normalize
+		if abs(db_chanel[i] ) > -1:
+			file.write(str(db_chanel[i]))
+			file.write(" " + str(abs_dur))
+			file.write('\n')
+		abs_dur += delt_dur
+	file.close()
 
 wav = wave.open(FILE_PATCH, mode="r")
 (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
@@ -87,16 +127,13 @@ for n in range(nchannels):
     abs_dur  = 0
 
     #Find time when amplitude diference is large
-    file = open("trigger points" + str(n),'w')
-    const_diference = 1
-    for i in range(len(channel) - 1):
-    	if abs(abs( format_db_int(channel[i]) ) - abs( format_db_int(channel[i+1]) ))   > const_diference:
-    		file.write(str(abs_dur))
-    		file.write('\n')
-    	abs_dur += delt_dur
-
-    file.close()
     
+    #Get norm amplitude list 
+    db_channel = get_db_channel(channel)
+    #Get norm diference
+    db_dif = norm_diferende(db_channel)
+    #Find trigger poits of time
+    write_trigger_points(db_dif,delt_dur)
 
     axes.plot(channel, "g")
     axes.yaxis.set_major_formatter(ticker.FuncFormatter(format_db_str))
