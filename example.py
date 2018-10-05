@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from math import *
 import soundfile
-FILE_PATCH = "24.wav"
+FILE_PATCH = "music1.wav"
 types = {
     1: np.int8,
     2: np.int16,
@@ -72,13 +72,14 @@ def norm_diferende(channel):
 	return norm_db
 
 def write_trigger_points(db_chanel,delt_dur):
-	file = open("trigger points",'w')
+	file = open("trigger points.txt",'w')
 	abs_dur = 0
-	for i in range(len(db_chanel) - 1):
-		#normalize
-		if abs(db_chanel[i] ) > -1:
-			file.write(str(db_chanel[i]))
-			file.write(" " + str(abs_dur))
+	for i in range(len(db_chanel)  -1):
+		if abs(db_chanel[i] ) > 50:
+			new_time = abs_dur - 0.3
+			#file.write(str(db_chanel[i]))
+			#file.write("%.2f"  % abs_dur)
+			file.write( "%.2f\tm1:sf(%d)|l3:y\n%.2f\tm1:off" % (new_time ,db_chanel[i]  , new_time + 0.75) )
 			file.write('\n')
 		abs_dur += delt_dur
 	file.close()
