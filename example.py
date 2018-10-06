@@ -71,26 +71,24 @@ def norm_diferende(channel):
 		norm_db = [ int((i / float(max) ) * 100 ) for i in norm_db ]
 	return norm_db
 
-def write_trigger_points(db_chanel,delt_dur):
-	file = open("trigger points.txt",'w')
+def write_trigger_points(db_chanel,delt_dur,file_name,const):
+	file = open(file_name + ".txt",'w')
 	abs_dur = 0
 	for i in range(len(db_chanel)  -1):
-		if db_chanel[i]  > 30:
+		if db_chanel[i]  > const:
 			new_time = abs_dur 
-			#file.write(str(db_chanel[i]))
-			#file.write("%.2f"  % abs_dur)
 			file.write( "%.2f\tm1:sf(%d)|l3:y\n%.2f\tm1:off" % (new_time ,db_chanel[i]  , new_time + 0.75) )
 			file.write('\n')
 		abs_dur += delt_dur
 	file.close()
 
-def get_frequency(channel, d_time):
+def get_freq_channeluency(channel, d_time):
     def sign(x):
         if x >= 0:
             return False
         else:
             return True
-    freq = []
+    freq_channel = []
     begin = 0
     i = 0
     half = False
@@ -105,12 +103,20 @@ def get_frequency(channel, d_time):
         else:
             if cur_time != 0:
                 for j in range(begin,i-1):
-                    freq.append(int ( (i - begin) / cur_time) )
+                    freq_channel.append(int ( (i - begin) / cur_time) )
             begin = i
             half = False
             cur_time = 0
-    return freq
-            
+    return freq_channel
+         
+def normalize_and_dif(vector,file_name,const):
+    global duration
+    delt_dur = duration / float(len(vector))
+    #Get norm diference
+    norm_vector = norm_diferende(vector)
+    #Find trigger poits of time
+    write_trigger_points(norm_vector,delt_dur,file_name,const)
+    return norm_vector
 
 wav = wave.open(FILE_PATCH, mode="r")
 (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
@@ -138,18 +144,20 @@ samples = np.fromstring(content, dtype=types[sampwidth])
 plt.figure(1, figsize=(float(w)/DPI, float(h)/DPI), dpi=DPI)
 plt.subplots_adjust(wspace=0, hspace=0)
 
-image_nchanel = 1
-for n in range(image_nchanel):
+for n in range(1):
 
     channel = samples[n::nchannels]
-    print(len(channel))
-
+    
+    
+    
+    
     delt_dur = duration / float(len(channel))
-    #freq = get_frequency(channel,delt_dur)
+
+    freq_channel = get_freq_channeluency(channel,delt_dur)
+    freq_channel = freq_channel[0::k]
+    #for i in range(len(freq_channel)):
+    #    print(str(freq_channel[i]))
     channel = channel[0::k]
-    #freq = freq[0::k]
-    #for i in range(len(freq)):
-    #    print(str(freq[i]))
     
 
 
@@ -160,17 +168,13 @@ for n in range(image_nchanel):
         
     #processing
 
-    delt_dur = duration / float(len(channel)) 
-    print(delt_dur )
-
+    
     #Find time when amplitude diference is large
     
-    #Get norm amplitude list 
+    
     db_channel = get_db_channel(channel)
-    #Get norm diference
-    db_dif = norm_diferende(db_channel)
-    #Find trigger poits of time
-    write_trigger_points(db_dif,delt_dur)
+    normalize_and_dif(db_channel,"amplitude",30)
+    normalize_and_dif(freq_channel,"frequency",7)
 
     axes.plot(channel, "g")
     axes.yaxis.set_major_formatter(ticker.FuncFormatter(format_db_str))
