@@ -117,12 +117,24 @@ def get_elem(param,start_time):
         string = "%.2f\tl10:y|m10:sf(15)|m1x1:sf(30)|m1x2:sf(30)|l1x1:r|l1x2:r|m2x1:sf(30)|m2x2:sf(30)|l2x1:c|l2x2:c|m3x1:sf(30)|m3x2:sf(30)|l3x1:m|l3x2:m\n" % start_time
         new_time = start_time + 0.5
         for i in range(1,4):
-            string += "%.2f\tm1x%d:sf(100)|m1x%d:sf(100)|l1x1:%s|l1x2:%s|l2x1:%s|l2x2:%s|l3x1:%s" % (new_time,i,i,colors[(i-1) % 3],colors[(i-1) % 3],colors[i % 3],colors[i % 3],colors[(i+1) % 3])
+            string += "%.2f\tm%dx1:sf(100)|m%dx2:sf(100)|l1x1:%s|l1x2:%s|l2x1:%s|l2x2:%s|l3x1:%s" % (new_time,i,i,colors[(i-1) % 3],colors[(i-1) % 3],colors[i % 3],colors[i % 3],colors[(i+1) % 3])
             if i!=1:
-                string += "|m1xd%d:sf(30)|m2x%d:sf(30)|m3x%d:sf(30)" % (i,i,i)
+                string += "|m%dx1:sf(30)|m%dx2:sf(30)" % (i-1,i-1)
             string += "\n"
             new_time += delta_time
+    if param in range(0,50):
+        colors = ("g","y","r","b","m","c","m", "w")
+        delta_time = 1.5
+        string = "%.2f\tl1:g|k6:on|k7:on|k8:on|k9:on|k10:on|k11:on|k12:on|k13:on|k7:chess(20,5)|k8:chess(50,5)|k9:chess(70,5)\n" % start_time
+        new_time = start_time + 0.5
+        for i in range(1,13):
+            string += "%.2f\tm%d:sf(50)|l%d:%s" % (new_time,i,i,colors[(i+1) % 8])
+            
+            string += "\n"
+            new_time += delta_time
+
     return string
+
 def write_partiture(trigger_vector,delt_dur):
     print(delt_dur)
     file = open("partiture.txt","w")
