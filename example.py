@@ -108,15 +108,44 @@ def get_freq_channeluency(channel, d_time):
             half = False
             cur_time = 0
     return freq_channel
+
+def get_elem(param,start_time):
+    string = ""
+    if param in range(50,100):
+        colors = ("c","m","y")
+        delta_time = 1.5
+        string = "%.2f\tl10:y|m10:sf(15)|m1x1:sf(30)|m1x2:sf(30)|l1x1:r|l1x2:r|m2x1:sf(30)|m2x2:sf(30)|l2x1:c|l2x2:c|m3x1:sf(30)|m3x2:sf(30)|l3x1:m|l3x2:m\n" % start_time
+        new_time = start_time + 0.5
+        for i in range(1,4):
+            string += "%.2f\tm1x%d:sf(100)|m1x%d:sf(100)|l1x1:%s|l1x2:%s|l2x1:%s|l2x2:%s|l3x1:%s" % (new_time,i,i,colors[(i-1) % 3],colors[(i-1) % 3],colors[i % 3],colors[i % 3],colors[(i+1) % 3])
+            if i!=1:
+                string += "|m1xd%d:sf(30)|m2x%d:sf(30)|m3x%d:sf(30)" % (i,i,i)
+            string += "\n"
+            new_time += delta_time
+    return string
+def write_partiture(trigger_vector,delt_dur):
+    print(delt_dur)
+    file = open("partiture.txt","w")
+    for i in range(len(trigger_vector)):
+        string = get_elem(trigger_vector[i],i*delt_dur)
+        if string != "":
+            file.write(string)
+
+    file.close()
+
+
+
          
 def normalize_and_dif(vector,file_name,const):
     global duration
     delt_dur = duration / float(len(vector))
     #Get norm diference
-    norm_vector = norm_diferende(vector)
+    norm_dif_vector = norm_diferende(vector)
     #Find trigger poits of time
-    write_trigger_points(norm_vector,delt_dur,file_name,const)
-    return norm_vector
+    write_trigger_points(norm_dif_vector,delt_dur,file_name,const)
+    return norm_dif_vector
+
+
 
 wav = wave.open(FILE_PATCH, mode="r")
 (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
@@ -151,14 +180,14 @@ for n in range(1):
     
     
     
-    delt_dur = duration / float(len(channel))
 
-    freq_channel = get_freq_channeluency(channel,delt_dur)
-    freq_channel = freq_channel[0::k]
+    #freq_channel = get_freq_channeluency(channel,delt_dur)
+    #freq_channel = freq_channel[0::k]
     #for i in range(len(freq_channel)):
     #    print(str(freq_channel[i]))
     channel = channel[0::k]
     
+    delt_dur = duration / float(len(channel))
 
 
     axes = plt.subplot(2, 1, n+1)
@@ -173,8 +202,11 @@ for n in range(1):
     
     
     db_channel = get_db_channel(channel)
-    normalize_and_dif(db_channel,"amplitude",30)
-    normalize_and_dif(freq_channel,"frequency",7)
+    amplitude_dif = normalize_and_dif(db_channel,"amplitude",30)
+    #frq_dif = normalize_and_dif(freq_channel,"frequency",7)
+    write_partiture(amplitude_dif,delt_dur)
+    
+
 
     axes.plot(channel, "g")
     axes.yaxis.set_major_formatter(ticker.FuncFormatter(format_db_str))
